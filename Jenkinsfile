@@ -1,47 +1,50 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     tools {
-        maven 'Maven 3.8.1' // Hoặc tên Maven bạn đã cấu hình trong Jenkins
-        jdk 'JDK 17'        // Hoặc tên JDK bạn cấu hình trong Jenkins
+        maven 'Maven 3.8.1'
+        jdk 'JDK 17'
     }
 
     environment {
-        MAVEN_OPTS = '-Dmaven.repo.local=.m2/repository'
+        JAR_NAME = "demo-app-1.0.0.jar"
+        LOG_FILE = "app.log"
     }
 
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                checkout scm
+                git 'https://github.com/your-username/your-repo.git'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'mvn clean install -DskipTests'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Test') {
+        stage('Stop Old App') {
             steps {
-                sh 'mvn test'
+                // Tìm và kill app cũ đang chạy (nếu có)
+                sh '''
+                    PID=$(ps aux | grep $JAR_NAME | grep -v grep | awk '{print $2}')
+                    if [ ! -z "$PID" ]; then
+                        kill -9 $PID
+                    fi
+                '''
             }
         }
 
-        stage('Package') {
+        stage('Run New App') {
             steps {
-                sh 'mvn package'
+                // Chạy app mới nền
+                sh 'nohup java -jar target/$JAR_NAME > $LOG_FILE 2>&1 &'
             }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Build completed successfully!'
-        }
-        failure {
-            echo '❌ Build failed!'
         }
     }
 }
