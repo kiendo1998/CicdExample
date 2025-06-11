@@ -43,7 +43,18 @@ pipeline {
 
         stage('Run New App') {
             steps {
-                sh 'nohup java -jar target/$JAR_NAME > $LOG_FILE 2>&1 &'
+                sh '''
+                    nohup java -jar target/$JAR_NAME > $LOG_FILE 2>&1 &
+                    echo $! > app.pid
+                    disown
+                    sleep 5
+                    if ! ps -p $(cat app.pid) > /dev/null; then
+                        echo "App failed to start"
+                        cat $LOG_FILE
+                        exit 1
+                    fi
+                    echo "App started successfully on port 8081"
+                '''
             }
         }
     }
