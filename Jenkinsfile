@@ -43,7 +43,7 @@ pipeline {
 
         stage('Run New App') {
             steps {
-                sh '''
+                sh(script: '''
                     nohup java -jar target/$JAR_NAME > $LOG_FILE 2>&1 &
                     echo $! > app.pid
                     disown
@@ -54,8 +54,9 @@ pipeline {
                         exit 1
                     fi
                     echo "App started successfully on port 8081"
-                '''
+                ''', shell: '/bin/bash')
             }
         }
+
     }
 }
