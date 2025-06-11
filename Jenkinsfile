@@ -11,8 +11,9 @@ pipeline {
     }
 
     environment {
+        IMAGE_NAME = "demo-app"
+        CONTAINER_NAME = "demo-app-container"
         JAR_NAME = "demo-app-1.0.0.jar"
-        LOG_FILE = "app.log"
     }
 
     stages {
@@ -30,23 +31,33 @@ pipeline {
             }
         }
 
-        stage('Stop Old App') {
+        stage('Build Docker Image') {
             steps {
                 sh '''
-                    PID=$(ps aux | grep $JAR_NAME | grep -v grep | awk '{print $2}')
-                    if [ ! -z "$PID" ]; then
-                        kill -9 $PID
+                    docker build -t $IMAGE_NAME .
+                '''
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                sh '''
+                    if [ $(docker ps -aq -f name=$CONTAINER_NAME) ]; then
+                        docker stop $CONTAINER_NAME || true
+                        docker rm $CONTAINER_NAME || true
                     fi
                 '''
             }
         }
 
-        stage('Run New App') {
+        stage('Run New Container') {
             steps {
-                sh 'chmod +x start-app.sh && ./start-app.sh'
+                sh '''
+                    docker run -d --name $CONTAINER_NAME -p 8081:8081 $IMAGE_NAME
+                    sleep 5
+                    docker logs $CONTAINER_NAME
+                '''
             }
         }
-
-
     }
 }
