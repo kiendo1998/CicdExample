@@ -31,33 +31,18 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                sh '''
-                    docker build -t $IMAGE_NAME .
-                '''
-            }
-        }
+        stage('Build Docker image') {
+                    steps {
+                        sh 'docker build -t $IMAGE_NAME .'
+                    }
+                }
 
-        stage('Stop Old Container') {
-            steps {
-                sh '''
-                    if [ $(docker ps -aq -f name=$CONTAINER_NAME) ]; then
-                        docker stop $CONTAINER_NAME || true
-                        docker rm $CONTAINER_NAME || true
-                    fi
-                '''
-            }
-        }
-
-        stage('Run New Container') {
-            steps {
-                sh '''
-                    docker run -d --name $CONTAINER_NAME -p 8081:8081 $IMAGE_NAME
-                    sleep 5
-                    docker logs $CONTAINER_NAME
-                '''
-            }
-        }
+                stage('Run container') {
+                    steps {
+                        sh 'docker stop $IMAGE_NAME || true'
+                        sh 'docker rm $IMAGE_NAME || true'
+                        sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME $IMAGE_NAME'
+                    }
+                }
     }
 }
