@@ -41,7 +41,7 @@ pipeline {
                     steps {
                         sh 'docker stop $IMAGE_NAME || true'
                         sh 'docker rm $IMAGE_NAME || true'
-                        sh 'docker run -d -p 8080:8080 --name $IMAGE_NAME $IMAGE_NAME'
+                        sh 'docker run -d -p 8081:8081 --name $IMAGE_NAME $IMAGE_NAME'
                     }
                 }
     }
