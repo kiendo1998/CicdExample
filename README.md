@@ -8,7 +8,7 @@ This repository show how to setup a basic CICD flow for a spring boot applicatio
     1. Add credentials (add personal access token on github first)
     2. Add Tool: Maven 3.8.1, JDK 17
     3. Add new item pipeline for https://github.com/kiendo1998/CicdExample
-    4. mount to jenkins container and install docker:
+    4. Mount to jenkins container and install docker:
        - docker exec -it [container-name] bash
        - apt-get update
        - apt-get install -y docker.io
