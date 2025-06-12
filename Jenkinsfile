@@ -14,6 +14,7 @@ pipeline {
         IMAGE_NAME = "demo-app"
         CONTAINER_NAME = "demo-app-container"
         JAR_NAME = "demo-app-1.0.0.jar"
+        PORT = "8081"
     }
 
     stages {
@@ -32,17 +33,20 @@ pipeline {
         }
 
         stage('Build Docker image') {
-                    steps {
-                        sh 'docker build -t $IMAGE_NAME .'
-                    }
-                }
+            steps {
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
 
-                stage('Run container') {
-                    steps {
-                        sh 'docker stop $IMAGE_NAME || true'
-                        sh 'docker rm $IMAGE_NAME || true'
-                        sh 'docker run -d -p 8081:8081 --name $IMAGE_NAME $IMAGE_NAME'
-                    }
-                }
+        stage('Run container') {
+            steps {
+                // Dừng container cũ nếu tồn tại
+                sh 'docker stop $CONTAINER_NAME || true'
+                sh 'docker rm $CONTAINER_NAME || true'
+
+                // Chạy container mới
+                sh 'docker run -d -p $PORT:$PORT --name $CONTAINER_NAME $IMAGE_NAME'
+            }
+        }
     }
 }
